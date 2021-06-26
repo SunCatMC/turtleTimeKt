@@ -29,7 +29,6 @@ fun main(args: Array<String>) {
     println("Turtle Time interpreter\n")
     parser.parse(args)
 
-    println("test")
     val grid = initWorld(fileName)
     println(grid)
 }
