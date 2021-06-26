@@ -1,7 +1,5 @@
 package me.suncatmc.turtleTime
 
-class World {
-    val grid = Grid()
-
+class World(val grid: Grid) {
 
 }

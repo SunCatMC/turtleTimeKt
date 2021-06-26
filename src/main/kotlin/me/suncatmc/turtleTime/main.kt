@@ -36,4 +36,8 @@ fun main(args: Array<String>) {
 
     val grid = initGrid(fileName)
     println(grid)
+
+    grid[2][1] = '#'
+    println(grid[2])
+    println(grid)
 }

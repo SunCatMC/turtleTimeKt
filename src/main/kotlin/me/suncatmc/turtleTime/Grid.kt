@@ -1,7 +1,6 @@
 package me.suncatmc.turtleTime
 
-class Grid() {
-    private val grid = mutableListOf<CharArray>()
+data class Grid(private val grid: MutableList<Row> = mutableListOf()): List<Row> by grid {
 
     val rowSize: Int
         get() = grid.first().size
@@ -9,22 +8,18 @@ class Grid() {
     val columnSize: Int
         get() = grid.size
 
-    fun addRow(row: String) {
-        if (grid.isNotEmpty() && row.length != rowSize) {
-            throw WrongRowSizeException(columnSize, row.length, rowSize)
+    fun addRow(rowStr: String) {
+        if (grid.isNotEmpty() && rowStr.length != rowSize) {
+            throw WrongRowSizeException(columnSize, rowStr.length, rowSize)
         }
-        grid.add(row.toCharArray())
+        grid.add(Row(rowStr.toCharArray().toMutableList()))
     }
 
     override fun toString(): String {
         return "Grid[\n${grid.joinToString(separator = "\n") {
-            it.concatToString()
+            it.joinToString(separator = "")
         }
         }]"
-    }
-
-    operator fun get(rowIndex: Int): CharArray {
-        return grid[rowIndex]
     }
 
     operator fun get(x: Int, y: Int): Char {
