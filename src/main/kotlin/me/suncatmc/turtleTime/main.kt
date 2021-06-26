@@ -3,8 +3,9 @@ package me.suncatmc.turtleTime
 import kotlinx.cli.ArgParser
 import kotlinx.cli.ArgType
 import kotlinx.cli.optional
+import java.io.File
 
-fun initWorld(fileName: String?): Grid {
+fun initGrid(fileName: String?): Grid {
     val grid = Grid()
 
     if (fileName == null) {
@@ -14,9 +15,13 @@ fun initWorld(fileName: String?): Grid {
             if (line.isBlank()) {
                 break
             }
-            grid.addRow(line)
+            grid.addRow(line.trim())
         }
-        println("Code input finished")
+        println("Input of code finished\n")
+    } else {
+        File(fileName).forEachLine { line ->
+            grid.addRow(line.trim())
+        }
     }
 
     return grid
@@ -29,6 +34,6 @@ fun main(args: Array<String>) {
     println("Turtle Time interpreter\n")
     parser.parse(args)
 
-    val grid = initWorld(fileName)
+    val grid = initGrid(fileName)
     println(grid)
 }
