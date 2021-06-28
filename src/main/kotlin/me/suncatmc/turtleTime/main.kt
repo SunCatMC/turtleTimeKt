@@ -37,9 +37,12 @@ fun main(args: Array<String>) {
     val grid = initGrid(fileName)
     println("Original grid: $grid\n")
     val world = World(grid)
-    printDebug(world)
-    println("execute!")
-    world.invoke()
+    while (world.isAwake) {
+        printDebug(world)
+        println("execute!")
+        world.invoke()
+    }
+    println("The program finished execution. Here's the finished state:")
     printDebug(world)
 }
 

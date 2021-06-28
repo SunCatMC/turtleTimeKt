@@ -2,14 +2,18 @@ package me.suncatmc.turtleTime
 
 class World(val grid: Grid) {
     private val turtles = mutableListOf<Turtle>()
+    private val movableTurtles = turtles
     //TODO: add sequence object for reading input
+
+    val isAwake: Boolean
+        get() = turtles.isNotEmpty() && turtles.none { it.isAsleep }
 
     init {
         extractTurtles()
     }
 
     operator fun invoke() {
-        turtles.forEach{ it.invoke() }
+        movableTurtles.forEach{ it.invoke() }
     }
 
     private fun extractTurtles() {
