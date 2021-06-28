@@ -19,7 +19,7 @@ class Turtle(x: Int, y: Int, private val world: World) {
         private set
     var isAsleep = false
     private val canFallAsleep: Boolean
-        get() = currentCharBelow !in CodeGroup.water_like
+        get() = !isAsleep && currentCharBelow !in CodeGroup.water_like
     val currentCharBelow: Char
         get() = charBelow(x, y)
     private fun charBelow(x: Int, y: Int) = world.grid[x, y]
@@ -30,21 +30,42 @@ class Turtle(x: Int, y: Int, private val world: World) {
         move(Direction.straightList.random())
     }
 
-    private fun move(direction: Direction) {
-        if (isAsleep) return //TODO: don't forget about conveyors!
-        val xy = Coordinates(this.x + direction.x, this.y + direction.y)
-        val (x,y) = xy
-        val ch = charBelow(x, y)
-        val isThereTurtle = world.turtleStorage[x, y] != null
-        if (ch !in CodeGroup.walls && !isThereTurtle) {
-            val (oldX, oldY) = this.xy
-            this.xy = xy
-            world.turtleStorage.update(oldX, oldY,this)
-            return
+    private fun move(direction: Direction, isCausedByConveyor:Boolean = false) {
+        if (!isAsleep || isCausedByConveyor) {
+            val xy = getMovementCoordinates(direction)
+            val (x,y) = xy
+            val ch = charBelow(x, y)
+            val isThereTurtle = world.turtleStorage[x, y] != null
+            if (ch !in CodeGroup.walls && !isThereTurtle) {
+                val (oldX, oldY) = this.xy
+                updatePosition(xy)
+                world.turtleStorage.update(oldX, oldY,this)
+                return
+            }
+            if (canFallAsleep && (ch == CodeUnit.WALL || isThereTurtle || currentCharBelow in CodeGroup.ice_like)) {
+                isAsleep = true
+            }
         }
-        if (canFallAsleep && (ch == CodeUnit.WALL || isThereTurtle || currentCharBelow in CodeGroup.ice_like)) {
-            isAsleep = true
+        if (!isCausedByConveyor) {
+            getPushedByConveyorIfNeeded()
         }
+    }
+
+    private fun updatePosition(xy: Coordinates) {
+        this.xy = xy
+    }
+
+    private fun getMovementCoordinates(direction: Direction): Coordinates {
+        return Coordinates(this.x + direction.x, this.y + direction.y)
+    }
+
+    private fun getPushedByConveyorIfNeeded() {
+        if (currentCharBelow !in CodeGroup.conveyors) return
+        this.move(CodeGroup.mapConveyorToDirection.getValue(currentCharBelow), true)
+    }
+
+    override fun toString(): String {
+        return "Turtle(xy=$xy, value=$value, isAsleep=$isAsleep, canFallAsleep=$canFallAsleep, currentCharBelow=$currentCharBelow)"
     }
 }
 
