@@ -16,11 +16,11 @@ data class Grid(private val grid: MutableList<Row> = mutableListOf()): List<Row>
     }
 
     override fun toString(): String {
-        return "Grid[\n${grid.joinToString(separator = "\n") {
-            it.joinToString(separator = "")
-        }
-        }]"
+        return "Grid$grid"
     }
+
+    val mergedRows: List<String>
+        get() = grid.map { it.joinToString(separator = "") }
 
     fun copy(): Grid {
         return Grid(grid.map { it.copy() }.toMutableList())

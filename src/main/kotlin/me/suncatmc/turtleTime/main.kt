@@ -62,11 +62,7 @@ fun main(args: Array<String>) {
 
     val grid = initGrid(fileName)
     val world = World(grid)
-    if (isDebug) {
-        debug(world)
-    }
     while (world.isAwake) {
-        world.invoke()
         if (isDebug) {
             debug(world)
             with(DebugStorage) {
@@ -78,6 +74,7 @@ fun main(args: Array<String>) {
                 Unit
             }
         }
+        world.invoke()
     }
     if (isDebug) {
         println("The program finished execution. Here's the finished state:")
@@ -103,8 +100,22 @@ fun debugInputs() {
 }
 
 fun debug(world: World) {
-    println("Grid without turtles: ${world.grid}")
-    println("Grid with turtles: ${world.gridWithTurtles}")
-    println("List of turtles: ${world.turtleStorage.allList}")
+    println("List of turtles:")
+    world.turtleStorage.allList.forEach {
+        println(it)
+    }
+    val withoutTString = "Grid without turtles:"
+    val withTString = "Grid with turtles:"
+    if (world.grid.rowSize >= 40) {
+        println(withoutTString)
+        world.grid.mergedRows.forEach { println(it) }
+        println(withTString)
+        world.gridWithTurtles.mergedRows.forEach { println(it) }
+    } else {
+        println("%-${world.grid.rowSize}s %s".format(withTString, withoutTString))
+        world.gridWithTurtles.mergedRows.forEachIndexed { index, row ->
+            println("%-${withTString.length}s %s".format(row, world.grid.mergedRows[index]))
+        }
+    }
     println()
 }
