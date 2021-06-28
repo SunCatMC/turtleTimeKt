@@ -5,6 +5,7 @@ import kotlinx.cli.ArgType
 import kotlinx.cli.default
 import kotlinx.cli.optional
 import java.io.File
+import java.util.*
 import kotlin.system.exitProcess
 
 fun initGrid(fileName: String?): Grid {
@@ -29,6 +30,16 @@ fun initGrid(fileName: String?): Grid {
     return grid
 }
 
+object Project {
+    private val versionProperties = Properties()
+    init {
+        versionProperties.load(this.javaClass.getResourceAsStream("/project.properties"))
+    }
+
+    val version: String
+        get() = versionProperties.getProperty("version") ?: "no version"
+}
+
 object DebugStorage {
     var loopCountdown = 0
     var isEOF = false
@@ -39,10 +50,15 @@ fun main(args: Array<String>) {
     val isDebug by parser.option(
         ArgType.Boolean, shortName = "d",
         description = "Turn on debug mode").default(false)
+    val isQuiet by parser.option(
+        ArgType.Boolean, shortName = "q",
+        description = "\"Quiet mode\", aka remove the executable description string").default(false)
     val fileName by parser.argument(ArgType.String, description = "Program file").optional()
 
-    println("Turtle Time interpreter\n")
     parser.parse(args)
+    if (!isQuiet) {
+        println("Turtle Time interpreter, version ${Project.version}\n")
+    }
 
     val grid = initGrid(fileName)
     val world = World(grid)

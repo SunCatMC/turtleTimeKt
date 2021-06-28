@@ -26,14 +26,17 @@ tasks.withType<KotlinCompile>() {
     kotlinOptions.jvmTarget = "1.8"
 }
 
-sourceSets {
-    main {
-        java {
-            srcDirs(
-                "src/main/kotlin/"
-            )
-        }
+tasks.register("generateMyResources") {
+    outputs.dir("generatedResources")
+    doLast {
+        val generated = File("generatedResources", "project.properties")
+        generated.writeText("version=${version}")
     }
+}
+
+sourceSets.main {
+    java.srcDirs("src/main/kotlin/")
+    output.dir(mapOf("builtBy" to tasks.named("generateMyResources")),"generatedResources")
 }
 
 tasks.jar {
