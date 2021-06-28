@@ -38,6 +38,7 @@ fun main(args: Array<String>) {
     println("Original grid: $grid\n")
     val world = World(grid)
     while (world.isAwake) {
+    //repeat (2) {
         printDebug(world)
         println("execute!")
         world.invoke()

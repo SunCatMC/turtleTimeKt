@@ -1,6 +1,6 @@
 package me.suncatmc.turtleTime
 
-class Turtle(x: Int, y: Int, val world: World) {
+class Turtle(x: Int, y: Int, private val world: World) {
     var x = x
         private set(value) {
             field = value.mod(world.grid.rowSize)
@@ -9,12 +9,18 @@ class Turtle(x: Int, y: Int, val world: World) {
         private set(value) {
             field = value.mod(world.grid.columnSize)
         }
+    var xy: Coordinates
+        get() = Coordinates(x, y)
+        set(value) {
+            x = value.x
+            y = value.y
+        }
     var value = 0
         private set
     var isAsleep = false
     private val canFallAsleep: Boolean
         get() = currentCharBelow !in CodeGroup.water_like
-    private val currentCharBelow: Char
+    val currentCharBelow: Char
         get() = charBelow(x, y)
     private fun charBelow(x: Int, y: Int) = world.grid[x, y]
 
@@ -26,15 +32,17 @@ class Turtle(x: Int, y: Int, val world: World) {
 
     private fun move(direction: Direction) {
         if (isAsleep) return //TODO: don't forget about conveyors!
-        val x = this.x + direction.x
-        val y = this.y + direction.y
+        val xy = Coordinates(this.x + direction.x, this.y + direction.y)
+        val (x,y) = xy
         val ch = charBelow(x, y)
-        if (ch !in CodeGroup.walls) {
-            this.x = x
-            this.y = y
+        val isThereTurtle = world.turtleStorage[x, y] != null
+        if (ch !in CodeGroup.walls && !isThereTurtle) {
+            val (oldX, oldY) = this.xy
+            this.xy = xy
+            world.turtleStorage.update(oldX, oldY,this)
             return
         }
-        if (canFallAsleep && (ch == CodeUnit.WALL || currentCharBelow in CodeGroup.ice_like)) {
+        if (canFallAsleep && (ch == CodeUnit.WALL || isThereTurtle || currentCharBelow in CodeGroup.ice_like)) {
             isAsleep = true
         }
     }
