@@ -18,8 +18,14 @@ class Turtle(x: Int, y: Int, private val world: World) {
     var value = 0
         private set
     var isAsleep = false
+
+    private var currentDirection = randomDirection()
+    private fun randomDirection() = Direction.straightList.random()
+
     private val canFallAsleep: Boolean
         get() = !isAsleep && currentCharBelow !in CodeGroup.water_like
+    private val isSliding: Boolean
+        get() = currentCharBelow in CodeGroup.ice_like
     val currentCharBelow: Char
         get() = charBelow(x, y)
     private fun charBelow(x: Int, y: Int) = world.grid[x, y]
@@ -27,7 +33,11 @@ class Turtle(x: Int, y: Int, private val world: World) {
     operator fun invoke() {
         if (currentCharBelow in CodeGroup.walls)
             throw Exception("turtle in a wall wut (at x $x y $y)")
-        move(Direction.straightList.random())
+        move(currentDirection)
+        if (isAsleep) return
+        if (!isSliding) {
+            currentDirection = randomDirection()
+        }
     }
 
     private fun move(direction: Direction, isCausedByConveyor:Boolean = false) {
@@ -42,7 +52,7 @@ class Turtle(x: Int, y: Int, private val world: World) {
                 world.turtleStorage.update(oldX, oldY,this)
                 return
             }
-            if (canFallAsleep && (ch == CodeUnit.WALL || isThereTurtle || currentCharBelow in CodeGroup.ice_like)) {
+            if (canFallAsleep && (ch == CodeUnit.WALL || isThereTurtle || isSliding)) {
                 isAsleep = true
             }
         }
@@ -65,8 +75,9 @@ class Turtle(x: Int, y: Int, private val world: World) {
     }
 
     override fun toString(): String {
-        return "Turtle(xy=$xy, value=$value, isAsleep=$isAsleep, canFallAsleep=$canFallAsleep, currentCharBelow=$currentCharBelow)"
+        return "Turtle(xy=$xy, value=$value, isAsleep=$isAsleep, currentDirection=$currentDirection, canFallAsleep=$canFallAsleep, isSliding=$isSliding, currentCharBelow=$currentCharBelow)"
     }
+
 }
 
 //no one will know this was taken from stackoverflow
