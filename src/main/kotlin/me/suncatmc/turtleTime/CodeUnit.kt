@@ -27,4 +27,7 @@ object CodeUnit {
     const val CONVEYOR_DOWN = 'v'
     const val CONVEYOR_LEFT = '<'
     const val CONVEYOR_RIGHT = '>'
+    const val TURTLE_MAIN = 'O'
+    const val TURTLE_WATER = 'o'
+    const val TURTLE_ICE = '!'
 }

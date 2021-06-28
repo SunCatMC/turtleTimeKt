@@ -19,9 +19,9 @@ class World(val grid: Grid) {
     private fun extractTurtles() {
         grid.forEachIndexed { y, row ->
             row.forEachIndexed { x, c ->
-                if (c in turtleTypes) {
+                if (c in CodeGroup.turtles) {
                     turtles.add(Turtle(x, y, this))
-                    grid[x, y] = mapTurtleToCell.getValue(c)
+                    grid[x, y] = CodeGroup.mapTurtleToCell.getValue(c)
                 }
             }
         }
@@ -31,14 +31,8 @@ class World(val grid: Grid) {
         get() {
             return grid.copy().apply {
                 turtles.forEach {
-                    this[it.x, it.y] = mapCellToTurtle[grid[it.x, it.y]] ?: 'O'
+                    this[it.x, it.y] = CodeGroup.mapCellToTurtle[grid[it.x, it.y]] ?: CodeUnit.TURTLE_MAIN
                 }
             }
         }
-
-    companion object {
-        val mapTurtleToCell = mapOf('O' to '#', 'o' to '~', '!' to '_')
-        val mapCellToTurtle = mapTurtleToCell.entries.associateBy({ it.value }) { it.key }
-        val turtleTypes = mapTurtleToCell.keys
-    }
 }
