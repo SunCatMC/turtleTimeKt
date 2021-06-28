@@ -5,7 +5,7 @@ class World(val grid: Grid) {
     //TODO: add sequence object for reading input
 
     val isAwake: Boolean
-        get() = turtleStorage.allList.isNotEmpty() && turtleStorage.allList.none { it.isAsleep }
+        get() = turtleStorage.allList.isNotEmpty() && !turtleStorage.allList.all { it.isAsleep }
 
     init {
         extractTurtles()
