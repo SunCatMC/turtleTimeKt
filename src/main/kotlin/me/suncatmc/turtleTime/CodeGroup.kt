@@ -11,6 +11,7 @@ object CodeGroup {
     val water_like = setOf(CodeUnit.WATER) + math
     val ice_like = setOf(CodeUnit.ICE, CodeUnit.CONDITION)
     val turtles = setOf(CodeUnit.TURTLE_MAIN, CodeUnit.TURTLE_WATER, CodeUnit.TURTLE_ICE)
+    val constants = ('0'..'9').toSet() + ('A'..'F').toSet()
     val mapTurtleToCell = mapOf(CodeUnit.TURTLE_MAIN to CodeUnit.GRASS, CodeUnit.TURTLE_WATER to CodeUnit.WATER,
         CodeUnit.TURTLE_ICE to CodeUnit.ICE)
     val mapCellToTurtle = mapTurtleToCell.entries.associateBy({ it.value }) { it.key } +

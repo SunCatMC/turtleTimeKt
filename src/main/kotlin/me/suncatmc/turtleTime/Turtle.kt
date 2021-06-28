@@ -34,6 +34,8 @@ class Turtle(x: Int, y: Int, private val world: World) {
         if (currentCharBelow in CodeGroup.walls)
             throw Exception("turtle in a wall wut (at x $x y $y)")
         move(currentDirection)
+        if (currentCharBelow in CodeGroup.constants)
+            this.value = currentCharBelow.digitToInt(16)
         if (isAsleep) return
         if (!isSliding) {
             currentDirection = randomDirection()
@@ -45,7 +47,7 @@ class Turtle(x: Int, y: Int, private val world: World) {
             val xy = getMovementCoordinates(direction)
             val (x,y) = xy
             val ch = charBelow(x, y)
-            val isThereTurtle = world.turtleStorage[x, y] != null
+            val isThereTurtle = world.turtleStorage[x, y].let {it != null && it !== this}
             if (ch !in CodeGroup.walls && !isThereTurtle) {
                 val (oldX, oldY) = this.xy
                 updatePosition(xy)
