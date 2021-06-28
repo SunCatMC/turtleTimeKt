@@ -15,6 +15,7 @@ repositories {
 
 dependencies {
     testImplementation(kotlin("test"))
+    implementation("org.jetbrains.kotlinx:kotlinx-cli:0.3.2")
 }
 
 tasks.test {
@@ -31,9 +32,6 @@ sourceSets {
             srcDirs(
                 "src/main/kotlin/"
             )
-        }
-        dependencies {
-            implementation("org.jetbrains.kotlinx:kotlinx-cli:0.3.2")
         }
     }
 }
