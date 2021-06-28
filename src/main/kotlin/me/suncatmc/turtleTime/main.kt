@@ -35,8 +35,16 @@ fun main(args: Array<String>) {
     parser.parse(args)
 
     val grid = initGrid(fileName)
-    println("Original grid: $grid")
+    println("Original grid: $grid\n")
     val world = World(grid)
+    printDebug(world)
+    println("execute!")
+    world.invoke()
+    printDebug(world)
+}
+
+fun printDebug(world: World) {
     println("Grid without turtles: ${world.grid}")
     println("Grid with turtles: ${world.gridWithTurtles}")
+    println()
 }

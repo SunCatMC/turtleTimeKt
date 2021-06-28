@@ -22,11 +22,15 @@ data class Grid(private val grid: MutableList<Row> = mutableListOf()): List<Row>
         }]"
     }
 
+    fun copy(): Grid {
+        return Grid(grid.map { it.copy() }.toMutableList())
+    }
+
     operator fun get(x: Int, y: Int): Char {
-        return grid[y][x]
+        return grid[y.mod(columnSize)][x.mod(rowSize)]
     }
 
     operator fun set(x: Int, y: Int, ch: Char) {
-        grid[y][x] = ch
+        grid[y.mod(columnSize)][x.mod(rowSize)] = ch
     }
 }

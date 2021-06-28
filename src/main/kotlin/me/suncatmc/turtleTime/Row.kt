@@ -8,4 +8,8 @@ data class Row(private val list: MutableList<Char>): List<Char> by list {
     override fun toString(): String {
         return "Row$list"
     }
+
+    fun copy(): Row {
+        return Row(list.toMutableList())
+    }
 }
