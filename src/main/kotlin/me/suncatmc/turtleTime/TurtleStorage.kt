@@ -20,12 +20,16 @@ class TurtleStorage(val rowSize: Int, val columnSize: Int) {
         turtleRow[turtle.x] = turtle
     }
 
-    fun update(oldX: Int, oldY: Int, turtle: Turtle) {
-        val turtleRow = turtleTree[oldY]
-            ?: throw Exception("this turtle is in another castle, not on y == $oldY")
-        if (!turtleRow.remove(oldX, turtle)) {
-            throw Exception("this turtle is in another castle, not on x == $oldX and y == $oldY")
+    fun removeAt(x: Int, y: Int) {
+        val turtleRow = turtleTree[y]
+            ?: throw Exception("this turtle is in another castle, not on y == $y")
+        if (turtleRow.remove(x) == null) {
+            throw Exception("this turtle is in another castle, not on x == $x and y == $y")
         }
+    }
+
+    fun update(oldX: Int, oldY: Int, turtle: Turtle) {
+        this.removeAt(oldX, oldY)
         this.addToTree(turtle)
     }
 
