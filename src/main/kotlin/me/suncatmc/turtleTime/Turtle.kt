@@ -18,6 +18,8 @@ class Turtle(x: Int, y: Int, private val world: World) {
     var value = 0
         private set
     var isAsleep = false
+    var hasMoved = false
+        private set
 
     private var currentDirection = randomDirection()
     private fun randomDirection() = Direction.straightList.random()
@@ -27,7 +29,7 @@ class Turtle(x: Int, y: Int, private val world: World) {
     private val isSliding: Boolean
         get() = currentCharBelow in CodeGroup.ice_like
     val currentCharBelow: Char
-        get() = world.charBelow(xy)
+        get() = world.grid[xy]
 
     operator fun invoke() {
         when (currentCharBelow) {
@@ -38,9 +40,14 @@ class Turtle(x: Int, y: Int, private val world: World) {
             }
             CodeUnit.CONDITION -> if (value != 0) move(currentDirection)
         }
-        if (move(currentDirection)) {
+        hasMoved = move(currentDirection)
+    }
+
+    fun postProcessing() {
+        if (hasMoved) {
             updateValue()
         }
+        hasMoved = false
         if (isAsleep) return
         if (!isSliding) {
             currentDirection = randomDirection()
@@ -50,12 +57,12 @@ class Turtle(x: Int, y: Int, private val world: World) {
     private fun move(direction: Direction, isCausedByConveyor:Boolean = false): Boolean {
         if (!isAsleep || isCausedByConveyor) {
             val xy = getMovementCoordinates(direction)
-            val isBlocked = world.isPositionBlocked(xy, this)
+            val isBlocked = isPositionBlocked(xy)
             if (!isBlocked) {
                 updatePosition(xy)
                 return true
             }
-            if (canFallAsleep && (world.charBelow(xy) != CodeUnit.SOFT_WALL || isSliding)) {
+            if (canFallAsleep && (world.grid[xy] != CodeUnit.SOFT_WALL || isSliding)) {
                 isAsleep = true
             }
         }
@@ -65,19 +72,26 @@ class Turtle(x: Int, y: Int, private val world: World) {
         return false
     }
 
+    fun isPositionBlocked(xy: Coordinates): Boolean {
+        val (x, y) = xy
+        val ch = world.grid[xy]
+        val isThereOtherTurtle = world.turtleStorage[x, y, TurtleTime.FUTURE].let {it != null && it !== this}
+        return ch in CodeGroup.walls || isThereOtherTurtle
+    }
+
     private fun dupe() {
         val positions = CodeGroup.mapDuplicatorToDirections.getValue(currentCharBelow).map {
             getMovementCoordinates(it)
         }.toSet().filter {
-            !world.isPositionBlocked(it, this)
+            !isPositionBlocked(it)
         }.shuffled()
         if (positions.isNotEmpty()) {
-            if (world.isPositionBlocked(positions.first(), this)) throw Exception("wait, position at ${positions.first()} is obstructed??")
+            if (isPositionBlocked(positions.first())) throw Exception("wait, position at ${positions.first()} is obstructed??")
             val copyTurtle = this.copy()
             updatePosition(positions.first())
             updateValue()
             if (positions.size > 1) {
-                if (world.isPositionBlocked(positions.last(), copyTurtle)) throw Exception("wait, position at ${positions.last()} is obstructed??")
+                if (copyTurtle.isPositionBlocked(positions.last())) throw Exception("wait, position at ${positions.last()} is obstructed??")
                 world.turtleStorage.add(copyTurtle)
                 copyTurtle.updatePosition(positions.last())
                 copyTurtle.updateValue()
@@ -101,6 +115,17 @@ class Turtle(x: Int, y: Int, private val world: World) {
             this.value = currentCharBelow.digitToInt(16)
         }
         if (isAsleep) return
+        if (currentCharBelow in CodeGroup.math) {
+            val mathOp = operatorFromChar(currentCharBelow)
+            Direction.validList.map {
+                getMovementCoordinates(it)
+            }.forEach {
+                val turtle = world.turtleStorage[it.x, it.y, TurtleTime.FUTURE]
+                if (turtle != null) {
+                    value = mathOp(value, turtle.value)
+                }
+            }
+        }
     }
 
     private fun updatePosition(xy: Coordinates) {
@@ -122,19 +147,17 @@ class Turtle(x: Int, y: Int, private val world: World) {
         return "Turtle(xy=$xy, value=$value, isAsleep=$isAsleep, currentDirection=$currentDirection," +
                 "canFallAsleep=$canFallAsleep, isSliding=$isSliding, currentCharBelow=\'$currentCharBelow\')"
     }
-
 }
 
-//no one will know this was taken from stackoverflow
 private fun operatorFromChar(charOperator: Char):(Int, Int)->Int
 {
     return when(charOperator)
     {
-        '+'->{a,b->a+b}
-        '-'->{a,b->a-b}
-        '/'->{a,b->a/b}
-        '*'->{a,b->a*b}
-        '%'->{a,b->a%b}
+        CodeUnit.PLUS -> {a,b->a+b}
+        CodeUnit.MINUS -> {a,b->a-b}
+        CodeUnit.DIV -> {a,b->a/b}
+        CodeUnit.MUL -> {a,b->a*b}
+        CodeUnit.MOD -> {a,b->a.mod(b)}
         else -> throw Exception("That's not a supported operator")
     }
 }

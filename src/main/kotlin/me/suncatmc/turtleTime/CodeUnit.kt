@@ -13,11 +13,11 @@ object CodeUnit {
     const val HOUSE_NUM = '$' //TODO
     const val DUPE_HOR = '='
     const val DUPE_VER = '|'
-    const val PLUS = '+'  //TODO
-    const val MINUS = '-' //TODO
-    const val DIV = '/'   //TODO
-    const val MOD = '%'   //TODO
-    const val MUL = '*'   //TODO
+    const val PLUS = '+'
+    const val MINUS = '-'
+    const val DIV = '/'
+    const val MOD = '%'
+    const val MUL = '*'
     const val PORTAL_A = 'a' //TODO
     const val PORTAL_B = 'b' //TODO
     const val PORTAL_C = 'c' //TODO

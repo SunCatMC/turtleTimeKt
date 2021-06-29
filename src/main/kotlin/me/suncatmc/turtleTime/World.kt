@@ -13,7 +13,9 @@ class World(val grid: Grid) {
 
     operator fun invoke() {
         turtleStorage.movableList.forEach{ it.invoke() }
+        turtleStorage.movableList.forEach{ it.postProcessing() }
         turtleStorage.pushBuffers()
+
     }
 
     private fun extractTurtles() {
@@ -36,13 +38,4 @@ class World(val grid: Grid) {
                 }
             }
         }
-
-    fun isPositionBlocked(xy: Coordinates, turtle: Turtle?): Boolean {
-        val (x, y) = xy
-        val ch = charBelow(xy)
-        val isThereOtherTurtle = turtleStorage[x, y, TurtleTime.FUTURE].let {it != null && it !== turtle}
-        return ch in CodeGroup.walls || isThereOtherTurtle
-    }
-
-    fun charBelow(xy: Coordinates) = grid[xy.x, xy.y]
 }
