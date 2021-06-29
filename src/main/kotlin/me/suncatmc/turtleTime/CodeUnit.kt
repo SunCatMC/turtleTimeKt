@@ -6,7 +6,7 @@ object CodeUnit {
     const val SOFT_WALL = 'S'
     const val WATER = '~'
     const val ICE = '_'
-    const val CONDITION = '?' //TODO
+    const val CONDITION = '?'
     const val INPUT_CH = 'i'  //TODO
     const val INPUT_NUM = 'I' //TODO
     const val HOUSE_CH = '&'  //TODO

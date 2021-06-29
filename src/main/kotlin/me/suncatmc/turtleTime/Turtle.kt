@@ -31,8 +31,12 @@ class Turtle(x: Int, y: Int, private val world: World) {
     private fun charBelow(x: Int, y: Int) = world.grid[x, y]
 
     operator fun invoke() {
-        if (currentCharBelow in CodeGroup.walls)
-            throw Exception("turtle in a wall wut (at x $x y $y)")
+        if (currentCharBelow in CodeGroup.walls) {
+            throw Exception("turtle in a wall wut (at x == $x, y == $y)")
+        }
+        if (currentCharBelow == CodeUnit.CONDITION && value != 0) {
+            move(currentDirection)
+        }
         move(currentDirection)
         if (currentCharBelow in CodeGroup.constants)
             this.value = currentCharBelow.digitToInt(16)
