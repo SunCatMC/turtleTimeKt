@@ -51,7 +51,7 @@ class Turtle(x: Int, y: Int, private val world: World) {
             val xy = getMovementCoordinates(direction)
             val (x,y) = xy
             val ch = charBelow(x, y)
-            val isThereTurtle = world.turtleStorage[x, y].let {it != null && it !== this}
+            val isThereTurtle = world.turtleStorage[x, y, TurtleTime.FUTURE].let {it != null && it !== this}
             if (ch !in CodeGroup.walls && !isThereTurtle) {
                 val (oldX, oldY) = this.xy
                 updatePosition(xy)

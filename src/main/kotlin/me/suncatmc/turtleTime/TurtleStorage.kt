@@ -1,27 +1,31 @@
 package me.suncatmc.turtleTime
 
 class TurtleStorage(val rowSize: Int, val columnSize: Int) {
-    private val _allList = mutableListOf<Turtle>()
-    val allList: List<Turtle>
-        get() = _allList
+    var allList = listOf<Turtle>()
+        private set
     val movableList: List<Turtle>
-        get() = _allList.filter {
+        get() = allList.filter {
             !it.isAsleep || it.currentCharBelow in CodeGroup.conveyors
         }
-    private val turtleTree = mutableMapOf<Int, MutableMap<Int, Turtle>>()
+    private val allListBuffer = mutableListOf<Turtle>()
+    private var turtleTree = mapOf<Int, Map<Int, Turtle>>()
+    private val turtleTreeBuffer = mutableMapOf<Int, MutableMap<Int, Turtle>>()
 
-    operator fun get(x: Int, y: Int): Turtle? = turtleTree[y.mod(columnSize)]?.get(x.mod(columnSize))
+    operator fun get(x: Int, y: Int, time: TurtleTime): Turtle? {
+        val tree = if (time == TurtleTime.FUTURE) turtleTreeBuffer else turtleTree
+        return tree[y.mod(columnSize)]?.get(x.mod(columnSize))
+    }
 
     private fun addToTree(turtle: Turtle) {
-        val turtleRow = turtleTree[turtle.y] ?: run {
-            turtleTree[turtle.y] = mutableMapOf()
-            turtleTree.getValue(turtle.y)
+        val turtleRow = turtleTreeBuffer[turtle.y] ?: run {
+            turtleTreeBuffer[turtle.y] = mutableMapOf()
+            turtleTreeBuffer.getValue(turtle.y)
         }
         turtleRow[turtle.x] = turtle
     }
 
     fun removeAt(x: Int, y: Int) {
-        val turtleRow = turtleTree[y]
+        val turtleRow = turtleTreeBuffer[y]
             ?: throw Exception("this turtle is in another castle, not on y == $y")
         if (turtleRow.remove(x) == null) {
             throw Exception("this turtle is in another castle, not on x == $x and y == $y")
@@ -34,7 +38,12 @@ class TurtleStorage(val rowSize: Int, val columnSize: Int) {
     }
 
     fun add(turtle: Turtle) {
-        _allList.add(turtle)
+        allListBuffer.add(turtle)
         this.addToTree(turtle)
+    }
+
+    fun pushBuffers() {
+        allList = allListBuffer.toList()
+        turtleTree = turtleTreeBuffer.map { it.key to it.value.toMap() }.toMap()
     }
 }

@@ -13,6 +13,7 @@ class World(val grid: Grid) {
 
     operator fun invoke() {
         turtleStorage.movableList.forEach{ it.invoke() }
+        turtleStorage.pushBuffers()
     }
 
     private fun extractTurtles() {
@@ -24,6 +25,7 @@ class World(val grid: Grid) {
                 }
             }
         }
+        turtleStorage.pushBuffers()
     }
 
     val gridWithTurtles: Grid
