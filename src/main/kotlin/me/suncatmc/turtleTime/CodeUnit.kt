@@ -11,8 +11,8 @@ object CodeUnit {
     const val INPUT_NUM = 'I' //TODO
     const val HOUSE_CH = '&'  //TODO
     const val HOUSE_NUM = '$' //TODO
-    const val DUPE_HOR = '='  //TODO
-    const val DUPE_VER = '|'  //TODO
+    const val DUPE_HOR = '='
+    const val DUPE_VER = '|'
     const val PLUS = '+'  //TODO
     const val MINUS = '-' //TODO
     const val DIV = '/'   //TODO

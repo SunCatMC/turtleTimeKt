@@ -8,6 +8,14 @@ data class Grid(private val grid: MutableList<Row> = mutableListOf()): List<Row>
     val columnSize: Int
         get() = grid.size
 
+    fun mapCoordinatesToGrid(xy: Coordinates): Coordinates {
+        return mapCoordinatesToGrid(xy.x, xy.y)
+    }
+
+    fun mapCoordinatesToGrid(x: Int, y: Int): Coordinates {
+        return Coordinates(x.mod(rowSize), y.mod(columnSize))
+    }
+
     fun addRow(rowStr: String) {
         if (grid.isNotEmpty() && rowStr.length != rowSize) {
             throw WrongRowSizeException(columnSize, rowStr.length, rowSize)
@@ -27,10 +35,17 @@ data class Grid(private val grid: MutableList<Row> = mutableListOf()): List<Row>
     }
 
     operator fun get(x: Int, y: Int): Char {
-        return grid[y.mod(columnSize)][x.mod(rowSize)]
+        val new = mapCoordinatesToGrid(x, y)
+        return grid[new.y][new.x]
+    }
+
+    operator fun get(xy: Coordinates): Char {
+        val new = mapCoordinatesToGrid(xy)
+        return grid[new.y][new.x]
     }
 
     operator fun set(x: Int, y: Int, ch: Char) {
-        grid[y.mod(columnSize)][x.mod(rowSize)] = ch
+        val new = mapCoordinatesToGrid(x, y)
+        grid[new.y][new.x] = ch
     }
 }

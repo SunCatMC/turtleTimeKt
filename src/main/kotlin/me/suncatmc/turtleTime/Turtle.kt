@@ -27,61 +27,100 @@ class Turtle(x: Int, y: Int, private val world: World) {
     private val isSliding: Boolean
         get() = currentCharBelow in CodeGroup.ice_like
     val currentCharBelow: Char
-        get() = charBelow(x, y)
-    private fun charBelow(x: Int, y: Int) = world.grid[x, y]
+        get() = world.charBelow(xy)
 
     operator fun invoke() {
-        if (currentCharBelow in CodeGroup.walls) {
-            throw Exception("turtle in a wall wut (at x == $x, y == $y)")
+        when (currentCharBelow) {
+            in CodeGroup.walls -> throw Exception("turtle in a wall wut (at x == $x, y == $y)")
+            in CodeGroup.duplicators -> {
+                dupe()
+                return
+            }
+            CodeUnit.CONDITION -> if (value != 0) move(currentDirection)
         }
-        if (currentCharBelow == CodeUnit.CONDITION && value != 0) {
-            move(currentDirection)
+        if (move(currentDirection)) {
+            updateValue()
         }
-        move(currentDirection)
-        if (currentCharBelow in CodeGroup.constants)
-            this.value = currentCharBelow.digitToInt(16)
         if (isAsleep) return
         if (!isSliding) {
             currentDirection = randomDirection()
         }
     }
 
-    private fun move(direction: Direction, isCausedByConveyor:Boolean = false) {
+    private fun move(direction: Direction, isCausedByConveyor:Boolean = false): Boolean {
         if (!isAsleep || isCausedByConveyor) {
             val xy = getMovementCoordinates(direction)
-            val (x,y) = xy
-            val ch = charBelow(x, y)
-            val isThereTurtle = world.turtleStorage[x, y, TurtleTime.FUTURE].let {it != null && it !== this}
-            if (ch !in CodeGroup.walls && !isThereTurtle) {
-                val (oldX, oldY) = this.xy
+            val isBlocked = world.isPositionBlocked(xy, this)
+            if (!isBlocked) {
                 updatePosition(xy)
-                world.turtleStorage.update(oldX, oldY,this)
-                return
+                return true
             }
-            if (canFallAsleep && (ch == CodeUnit.WALL || isThereTurtle || isSliding)) {
+            if (canFallAsleep && (world.charBelow(xy) != CodeUnit.SOFT_WALL || isSliding)) {
                 isAsleep = true
             }
         }
         if (!isCausedByConveyor) {
-            getPushedByConveyorIfNeeded()
+            return getPushedByConveyorIfNeeded()
+        }
+        return false
+    }
+
+    private fun dupe() {
+        val positions = CodeGroup.mapDuplicatorToDirections.getValue(currentCharBelow).map {
+            getMovementCoordinates(it)
+        }.toSet().filter {
+            !world.isPositionBlocked(it, this)
+        }.shuffled()
+        if (positions.isNotEmpty()) {
+            if (world.isPositionBlocked(positions.first(), this)) throw Exception("wait, position at ${positions.first()} is obstructed??")
+            val copyTurtle = this.copy()
+            updatePosition(positions.first())
+            updateValue()
+            if (positions.size > 1) {
+                if (world.isPositionBlocked(positions.last(), copyTurtle)) throw Exception("wait, position at ${positions.last()} is obstructed??")
+                world.turtleStorage.add(copyTurtle)
+                copyTurtle.updatePosition(positions.last())
+                copyTurtle.updateValue()
+            }
+        } else {
+            isAsleep = true
         }
     }
 
+    private fun copy(): Turtle {
+        return Turtle(x, y, world).let {
+            it.value = this.value
+            it.currentDirection = this.currentDirection
+            it.isAsleep = this.isAsleep
+            it
+        }
+    }
+    
+    private fun updateValue() {
+        if (currentCharBelow in CodeGroup.constants) {
+            this.value = currentCharBelow.digitToInt(16)
+        }
+        if (isAsleep) return
+    }
+
     private fun updatePosition(xy: Coordinates) {
+        val (oldX, oldY) = this.xy
         this.xy = xy
+        world.turtleStorage.update(oldX, oldY,this)
     }
 
     private fun getMovementCoordinates(direction: Direction): Coordinates {
-        return Coordinates(this.x + direction.x, this.y + direction.y)
+        return world.grid.mapCoordinatesToGrid(Coordinates(this.x + direction.x, this.y + direction.y))
     }
 
-    private fun getPushedByConveyorIfNeeded() {
-        if (currentCharBelow !in CodeGroup.conveyors) return
-        this.move(CodeGroup.mapConveyorToDirection.getValue(currentCharBelow), true)
+    private fun getPushedByConveyorIfNeeded(): Boolean {
+        if (currentCharBelow !in CodeGroup.conveyors) return false
+        return this.move(CodeGroup.mapConveyorToDirection.getValue(currentCharBelow), true)
     }
 
     override fun toString(): String {
-        return "Turtle(xy=$xy, value=$value, isAsleep=$isAsleep, currentDirection=$currentDirection, canFallAsleep=$canFallAsleep, isSliding=$isSliding, currentCharBelow=$currentCharBelow)"
+        return "Turtle(xy=$xy, value=$value, isAsleep=$isAsleep, currentDirection=$currentDirection," +
+                "canFallAsleep=$canFallAsleep, isSliding=$isSliding, currentCharBelow=\'$currentCharBelow\')"
     }
 
 }

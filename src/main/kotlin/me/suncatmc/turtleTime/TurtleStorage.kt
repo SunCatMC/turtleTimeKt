@@ -5,7 +5,7 @@ class TurtleStorage(val rowSize: Int, val columnSize: Int) {
         private set
     val movableList: List<Turtle>
         get() = allList.filter {
-            !it.isAsleep || it.currentCharBelow in CodeGroup.conveyors
+            !it.isAsleep || it.currentCharBelow in CodeGroup.conveyors || it.currentCharBelow in CodeGroup.duplicators
         }
     private val allListBuffer = mutableListOf<Turtle>()
     private var turtleTree = mapOf<Int, Map<Int, Turtle>>()
@@ -13,7 +13,7 @@ class TurtleStorage(val rowSize: Int, val columnSize: Int) {
 
     operator fun get(x: Int, y: Int, time: TurtleTime): Turtle? {
         val tree = if (time == TurtleTime.FUTURE) turtleTreeBuffer else turtleTree
-        return tree[y.mod(columnSize)]?.get(x.mod(columnSize))
+        return tree[y.mod(columnSize)]?.get(x.mod(rowSize))
     }
 
     private fun addToTree(turtle: Turtle) {
@@ -21,19 +21,24 @@ class TurtleStorage(val rowSize: Int, val columnSize: Int) {
             turtleTreeBuffer[turtle.y] = mutableMapOf()
             turtleTreeBuffer.getValue(turtle.y)
         }
+        turtleRow[turtle.x].let {
+            if (it != null && it !== turtle)
+                throw Exception("don't override your kind (at x == ${turtle.x} y == ${turtle.y})")
+        }
         turtleRow[turtle.x] = turtle
     }
 
-    fun removeAt(x: Int, y: Int) {
+    fun removeAt(x: Int, y: Int): Turtle {
         val turtleRow = turtleTreeBuffer[y]
-            ?: throw Exception("this turtle is in another castle, not on y == $y")
-        if (turtleRow.remove(x) == null) {
-            throw Exception("this turtle is in another castle, not on x == $x and y == $y")
-        }
+            ?: throw Exception("this turtle is in another castle, not at y == $y")
+        val removed = turtleRow.remove(x)
+            ?: throw Exception("this turtle is in another castle, not at x == $x and y == $y")
+        return removed
     }
 
     fun update(oldX: Int, oldY: Int, turtle: Turtle) {
-        this.removeAt(oldX, oldY)
+        val removed = this.removeAt(oldX, oldY)
+        if (removed !== turtle) throw Exception("congratulations, that was the wrong turtle")
         this.addToTree(turtle)
     }
 
