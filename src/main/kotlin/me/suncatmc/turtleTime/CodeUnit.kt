@@ -7,10 +7,10 @@ object CodeUnit {
     const val WATER = '~'
     const val ICE = '_'
     const val CONDITION = '?'
-    const val INPUT_CH = 'i'  //TODO
-    const val INPUT_NUM = 'I' //TODO
-    const val HOUSE_CH = '&'  //TODO
-    const val HOUSE_NUM = '$' //TODO
+    const val INPUT_CH = 'i'
+    const val INPUT_NUM = 'I'
+    const val HOUSE_CH = '&'
+    const val HOUSE_NUM = '$'
     const val DUPE_HOR = '='
     const val DUPE_VER = '|'
     const val PLUS = '+'

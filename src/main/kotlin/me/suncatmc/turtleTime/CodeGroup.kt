@@ -1,8 +1,8 @@
 package me.suncatmc.turtleTime
 
 object CodeGroup {
-    val input = setOf(CodeUnit.INPUT_CH, CodeUnit.INPUT_NUM)
-    val house = setOf(CodeUnit.HOUSE_CH, CodeUnit.HOUSE_NUM)
+    val inputs = setOf(CodeUnit.INPUT_CH, CodeUnit.INPUT_NUM)
+    val houses = setOf(CodeUnit.HOUSE_CH, CodeUnit.HOUSE_NUM)
     val duplicators = setOf(CodeUnit.DUPE_HOR, CodeUnit.DUPE_VER)
     val math = setOf(CodeUnit.PLUS, CodeUnit.MINUS, CodeUnit.DIV, CodeUnit.MOD, CodeUnit.MUL)
     val portal = setOf(CodeUnit.PORTAL_A, CodeUnit.PORTAL_B, CodeUnit.PORTAL_C, CodeUnit.PORTAL_D, CodeUnit.PORTAL_E)

@@ -46,7 +46,7 @@ class Turtle(x: Int, y: Int, private val world: World) {
 
     private fun rightAfterMove() {
         hasMoved = true
-        if (currentCharBelow in CodeGroup.house) enterHouse()
+        if (currentCharBelow in CodeGroup.houses) enterHouse()
     }
 
     fun postProcessing() {
@@ -95,6 +95,7 @@ class Turtle(x: Int, y: Int, private val world: World) {
             if (isPositionBlocked(positions.first())) throw Exception("wait, position at ${positions.first()} is obstructed??")
             val copyTurtle = this.copy()
             updatePosition(positions.first())
+            rightAfterMove()
             if (positions.size > 1) {
                 if (copyTurtle.isPositionBlocked(positions.last())) throw Exception("wait, position at ${positions.last()} is obstructed??")
                 world.turtleStorage.add(copyTurtle)
@@ -120,7 +121,7 @@ class Turtle(x: Int, y: Int, private val world: World) {
             in CodeGroup.constants -> {
                 this.value = currentCharBelow.digitToInt(16)
             }
-            in CodeGroup.input -> {
+            in CodeGroup.inputs -> {
                 readInput()
             }
         }
