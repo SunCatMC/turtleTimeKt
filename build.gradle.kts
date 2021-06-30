@@ -7,7 +7,7 @@ plugins {
 val projectGroup = "me.suncatmc"
 
 group = projectGroup
-version = "1.0-SNAPSHOT-1"
+version = "1.0"
 
 repositories {
     mavenCentral()
