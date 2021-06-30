@@ -33,8 +33,8 @@ class TurtleStorage(val rowSize: Int, val columnSize: Int) {
 
     fun remove(turtle: Turtle) {
         remove(turtle.x, turtle.y, turtle)
-        if (!allListBuffer.remove(turtle))
-            throw Exception("was this turtle ever added to the world? $turtle")
+        if (!allListBuffer.remove(turtle) && !freshlyAddedBuffer.remove(turtle))
+            throw Exception("was this turtle ever added to the storage? $turtle")
     }
 
     private fun remove(oldX: Int, oldY: Int, turtle: Turtle) {

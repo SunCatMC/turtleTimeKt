@@ -33,6 +33,8 @@ object TurtleIO {
     fun flushInput() {
         if (DebugStorage.isDebug) {
             println("Input a line here: ")
+        } else {
+            print("\n>")
         }
         inputIndex = 0
         input = readLine() ?: run {

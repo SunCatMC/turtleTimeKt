@@ -58,7 +58,7 @@ fun main(args: Array<String>) {
 
     parser.parse(args)
     if (!isQuiet) {
-        println("Turtle Time interpreter, version ${Project.version}\n")
+        println("Turtle Time interpreter, version ${Project.version}")
     }
     DebugStorage.isDebug = isDebug
 

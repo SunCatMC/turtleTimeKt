@@ -23,6 +23,7 @@ object CodeUnit {
     const val PORTAL_C = 'c' //TODO
     const val PORTAL_D = 'd' //TODO
     const val PORTAL_E = 'e' //TODO
+    const val PORTAL_F = 'f'
     const val CONVEYOR_UP = '^'
     const val CONVEYOR_DOWN = 'v'
     const val CONVEYOR_LEFT = '<'

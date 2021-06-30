@@ -44,9 +44,14 @@ class Turtle(x: Int, y: Int, private val world: World) {
         rightAfterMove()
     }
 
-    private fun rightAfterMove() {
-        hasMoved = true
-        if (currentCharBelow in CodeGroup.houses) enterHouse()
+    private fun rightAfterMove(forced: Boolean = false) {
+        if (forced) {
+            hasMoved = true
+        }
+        when (currentCharBelow) {
+            in CodeGroup.houses -> enterHouse()
+            in CodeGroup.portals -> tryToTeleport()
+        }
     }
 
     fun postProcessing() {
@@ -78,7 +83,27 @@ class Turtle(x: Int, y: Int, private val world: World) {
         return false
     }
 
-    fun isPositionBlocked(xy: Coordinates): Boolean {
+    private fun tryToTeleport() {
+        val newPosition = world.portalStorage.teleportFrom(currentCharBelow, xy)
+        if (!isPositionBlocked(newPosition)) {
+            Direction.validList.flatMap { dir ->
+                val xy = getMovementCoordinates(dir)
+                val set = mutableSetOf(xy)
+                if (world.grid[getMovementCoordinates(dir)] in CodeGroup.walls) {
+                    Direction.straightList.mapTo(set) {
+                        getOffsetCoordinates(xy, it)
+                    }
+                }
+                set
+            }.toSet().forEach {
+                val turtle = world.turtleStorage[it.x, it.y, TurtleTime.FUTURE]
+                turtle?.isAsleep = false
+            }
+            updatePosition(newPosition)
+        }
+    }
+
+    private fun isPositionBlocked(xy: Coordinates): Boolean {
         val (x, y) = xy
         val ch = world.grid[xy]
         val isThereOtherTurtle = world.turtleStorage[x, y, TurtleTime.FUTURE].let {it != null && it !== this}
@@ -95,12 +120,12 @@ class Turtle(x: Int, y: Int, private val world: World) {
             if (isPositionBlocked(positions.first())) throw Exception("wait, position at ${positions.first()} is obstructed??")
             val copyTurtle = this.copy()
             updatePosition(positions.first())
-            rightAfterMove()
+            rightAfterMove(true)
             if (positions.size > 1) {
                 if (copyTurtle.isPositionBlocked(positions.last())) throw Exception("wait, position at ${positions.last()} is obstructed??")
                 world.turtleStorage.add(copyTurtle)
                 copyTurtle.updatePosition(positions.last())
-                copyTurtle.rightAfterMove()
+                copyTurtle.rightAfterMove(true)
             }
         } else {
             isAsleep = true
@@ -180,7 +205,11 @@ class Turtle(x: Int, y: Int, private val world: World) {
     }
 
     private fun getMovementCoordinates(direction: Direction): Coordinates {
-        return world.grid.mapCoordinatesToGrid(Coordinates(this.x + direction.x, this.y + direction.y))
+        return getOffsetCoordinates(xy, direction)
+    }
+
+    private fun getOffsetCoordinates(from: Coordinates, direction: Direction): Coordinates {
+        return world.grid.mapCoordinatesToGrid(Coordinates(from.x + direction.x, from.y + direction.y))
     }
 
     private fun getPushedByConveyorIfNeeded(): Boolean {
