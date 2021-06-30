@@ -18,11 +18,11 @@ object CodeUnit {
     const val DIV = '/'
     const val MOD = '%'
     const val MUL = '*'
-    const val PORTAL_A = 'a' //TODO
-    const val PORTAL_B = 'b' //TODO
-    const val PORTAL_C = 'c' //TODO
-    const val PORTAL_D = 'd' //TODO
-    const val PORTAL_E = 'e' //TODO
+    const val PORTAL_A = 'a'
+    const val PORTAL_B = 'b'
+    const val PORTAL_C = 'c'
+    const val PORTAL_D = 'd'
+    const val PORTAL_E = 'e'
     const val PORTAL_F = 'f'
     const val CONVEYOR_UP = '^'
     const val CONVEYOR_DOWN = 'v'
