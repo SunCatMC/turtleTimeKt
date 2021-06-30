@@ -7,6 +7,9 @@ class TurtleStorage(val rowSize: Int, val columnSize: Int) {
         get() = allList.filter {
             !it.isAsleep || it.currentCharBelow in CodeGroup.conveyors || it.currentCharBelow in CodeGroup.duplicators
         }
+    val freshlyAddedBuffer = mutableListOf<Turtle>()
+    val freshlyAdded: List<Turtle>
+        get() = freshlyAddedBuffer.toList()
     private val allListBuffer = mutableListOf<Turtle>()
     private var turtleTree = mapOf<Int, Map<Int, Turtle>>()
     private val turtleTreeBuffer = mutableMapOf<Int, MutableMap<Int, Turtle>>()
@@ -28,26 +31,37 @@ class TurtleStorage(val rowSize: Int, val columnSize: Int) {
         turtleRow[turtle.x] = turtle
     }
 
-    fun removeAt(x: Int, y: Int): Turtle {
+    fun remove(turtle: Turtle) {
+        remove(turtle.x, turtle.y, turtle)
+        if (!allListBuffer.remove(turtle))
+            throw Exception("was this turtle ever added to the world? $turtle")
+    }
+
+    private fun remove(oldX: Int, oldY: Int, turtle: Turtle) {
+        val removed = this.removeFromTree(oldX, oldY)
+        if (removed !== turtle) throw Exception("congratulations, $removed was the wrong turtle (not $turtle)")
+    }
+
+    private fun removeFromTree(x: Int, y: Int): Turtle {
         val turtleRow = turtleTreeBuffer[y]
-            ?: throw Exception("this turtle is in another castle, not at y == $y")
-        val removed = turtleRow.remove(x)
-            ?: throw Exception("this turtle is in another castle, not at x == $x and y == $y")
-        return removed
+            ?: throw Exception("a turtle is in another castle, not at y == $y")
+        return turtleRow.remove(x)
+            ?: throw Exception("a turtle is in another castle, not at x == $x and y == $y")
     }
 
     fun update(oldX: Int, oldY: Int, turtle: Turtle) {
-        val removed = this.removeAt(oldX, oldY)
-        if (removed !== turtle) throw Exception("congratulations, that was the wrong turtle")
+        remove(oldX, oldY, turtle)
         this.addToTree(turtle)
     }
 
     fun add(turtle: Turtle) {
-        allListBuffer.add(turtle)
+        freshlyAddedBuffer.add(turtle)
         this.addToTree(turtle)
     }
 
     fun pushBuffers() {
+        allListBuffer.addAll(freshlyAddedBuffer)
+        freshlyAddedBuffer.clear()
         allList = allListBuffer.toList()
         turtleTree = turtleTreeBuffer.map { it.key to it.value.toMap() }.toMap()
     }

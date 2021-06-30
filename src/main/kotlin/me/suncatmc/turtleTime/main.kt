@@ -41,6 +41,7 @@ object Project {
 }
 
 object DebugStorage {
+    var isDebug = false
     var loopCountdown = 0
     var isEOF = false
 }
@@ -59,6 +60,7 @@ fun main(args: Array<String>) {
     if (!isQuiet) {
         println("Turtle Time interpreter, version ${Project.version}\n")
     }
+    DebugStorage.isDebug = isDebug
 
     val grid = initGrid(fileName)
     val world = World(grid)
@@ -75,7 +77,18 @@ fun main(args: Array<String>) {
             }
         }
         world.invoke()
+        val line = TurtleIO.flushOutput()
+        if (line.isNotEmpty()) {
+            if (DebugStorage.isDebug) {
+                println("Output received: ")
+            }
+            print(line)
+            if (DebugStorage.isDebug) {
+                println()
+            }
+        }
     }
+    println()
     if (isDebug) {
         println("The program finished execution. Here's the finished state:")
         debug(world)

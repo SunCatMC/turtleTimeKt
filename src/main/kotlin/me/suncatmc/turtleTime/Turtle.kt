@@ -41,6 +41,12 @@ class Turtle(x: Int, y: Int, private val world: World) {
             CodeUnit.CONDITION -> if (value != 0) move(currentDirection)
         }
         hasMoved = move(currentDirection)
+        rightAfterMove()
+    }
+
+    private fun rightAfterMove() {
+        hasMoved = true
+        if (currentCharBelow in CodeGroup.house) enterHouse()
     }
 
     fun postProcessing() {
@@ -89,12 +95,11 @@ class Turtle(x: Int, y: Int, private val world: World) {
             if (isPositionBlocked(positions.first())) throw Exception("wait, position at ${positions.first()} is obstructed??")
             val copyTurtle = this.copy()
             updatePosition(positions.first())
-            updateValue()
             if (positions.size > 1) {
                 if (copyTurtle.isPositionBlocked(positions.last())) throw Exception("wait, position at ${positions.last()} is obstructed??")
                 world.turtleStorage.add(copyTurtle)
                 copyTurtle.updatePosition(positions.last())
-                copyTurtle.updateValue()
+                copyTurtle.rightAfterMove()
             }
         } else {
             isAsleep = true
@@ -111,8 +116,13 @@ class Turtle(x: Int, y: Int, private val world: World) {
     }
     
     private fun updateValue() {
-        if (currentCharBelow in CodeGroup.constants) {
-            this.value = currentCharBelow.digitToInt(16)
+        when (currentCharBelow) {
+            in CodeGroup.constants -> {
+                this.value = currentCharBelow.digitToInt(16)
+            }
+            in CodeGroup.input -> {
+                readInput()
+            }
         }
         if (isAsleep) return
         if (currentCharBelow in CodeGroup.math) {
@@ -125,6 +135,40 @@ class Turtle(x: Int, y: Int, private val world: World) {
                     value = mathOp(value, turtle.value)
                 }
             }
+        }
+    }
+
+    private fun charToInt(ch: Char) = ch.code
+    private fun charToDigit(ch: Char) = if (ch in CodeGroup.constants) {
+        ch.digitToInt(CodeGroup.constants.size)
+    } else {
+        charToInt(ch)
+    }
+    private fun intToChar(i: Int) = i.toChar()
+    private fun digitToChar(i: Int) = if (i in CodeGroup.constants.indices)
+        i.digitToChar(CodeGroup.constants.size)
+    else
+        intToChar(i)
+
+    private fun enterHouse() {
+        val ch = when (currentCharBelow) {
+            CodeUnit.HOUSE_CH -> intToChar(value)
+            CodeUnit.HOUSE_NUM -> digitToChar(value)
+            else -> throw Exception("there is no house here (at x == $x, y == $y), turtle is sad =(")
+        }
+        TurtleIO.addOutputChar(ch)
+        world.turtleStorage.remove(this)
+    }
+
+    private fun readInput() {
+        val ch = TurtleIO.getInputChar() ?: run {
+            value = 0
+            return
+        }
+        value = when (currentCharBelow) {
+            CodeUnit.INPUT_CH -> charToInt(ch)
+            CodeUnit.INPUT_NUM -> charToDigit(ch)
+            else -> throw Exception("there is no input here (at x == $x, y == $y), turtle is sad =(")
         }
     }
 

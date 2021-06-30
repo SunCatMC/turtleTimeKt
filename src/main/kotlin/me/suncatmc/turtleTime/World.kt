@@ -14,6 +14,7 @@ class World(val grid: Grid) {
     operator fun invoke() {
         turtleStorage.movableList.forEach{ it.invoke() }
         turtleStorage.movableList.forEach{ it.postProcessing() }
+        turtleStorage.freshlyAdded.forEach{ it.postProcessing() }
         turtleStorage.pushBuffers()
 
     }
